@@ -1,6 +1,6 @@
-package com.cube.payment.payment.domain;
+package com.cube.payment.payment.entity;
 
-import com.cube.payment.order.domain.Order;
+import com.cube.payment.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 /**
  * 결제 엔티티.
  *
- * 결제는 완료 이후 수정이 불가능해야 하므로 모든 필드를 updatable = false로 설정.
- * setter를 제공하지 않아 JPA 영속성 컨텍스트를 통한 의도치 않은 변경을 방지.
+ * 결제 완료 후 금액 관련 필드는 변경 불가 (updatable = false).
+ * setter를 제공하지 않아 의도치 않은 데이터 변경을 방지한다.
  */
 @Entity
 @Table(name = "payments")

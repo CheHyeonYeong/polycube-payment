@@ -1,6 +1,6 @@
 package com.cube.payment.discount;
 
-import com.cube.payment.order.domain.Order;
+import com.cube.payment.order.entity.Order;
 import org.springframework.stereotype.Component;
 
 @Component

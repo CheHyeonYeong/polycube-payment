@@ -1,6 +1,8 @@
-package com.cube.payment.order.domain;
+package com.cube.payment.order.entity;
 
-import com.cube.payment.member.domain.Member;
+import com.cube.payment.common.exception.CustomException;
+import com.cube.payment.common.exception.ErrorCode;
+import com.cube.payment.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -28,7 +30,7 @@ public class Order {
 
     public Order(String productName, long originalPrice, Member member) {
         if (originalPrice < 0) {
-            throw new IllegalArgumentException("주문 원가는 0 이상이어야 합니다.");
+            throw new CustomException(ErrorCode.INVALID_ORDER_PRICE);
         }
         this.productName = productName;
         this.originalPrice = originalPrice;

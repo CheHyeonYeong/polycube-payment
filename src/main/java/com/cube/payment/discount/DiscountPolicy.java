@@ -1,13 +1,12 @@
 package com.cube.payment.discount;
 
-import com.cube.payment.order.domain.Order;
+import com.cube.payment.order.entity.Order;
 
 /**
- * 할인 정책 전략 인터페이스.
+ * 회원 등급 기반 할인 정책 인터페이스.
  *
- * 비즈니스 요구사항이 자주 바뀌는 환경을 고려하여 Strategy 패턴으로 설계.
- * 새로운 할인 정책 추가 시 이 인터페이스를 구현하는 클래스만 추가하면 되므로
- * 기존 코드를 수정하지 않고 확장할 수 있다 (OCP).
+ * Strategy 패턴으로 설계. 새로운 할인 정책 추가 시 이 인터페이스를 구현하는
+ * 클래스만 추가하면 기존 코드 수정 없이 확장 가능 (OCP).
  */
 public interface DiscountPolicy {
 

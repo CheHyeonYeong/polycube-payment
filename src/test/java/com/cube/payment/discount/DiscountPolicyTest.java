@@ -1,8 +1,8 @@
 package com.cube.payment.discount;
 
-import com.cube.payment.member.domain.Member;
-import com.cube.payment.member.domain.MemberGrade;
-import com.cube.payment.order.domain.Order;
+import com.cube.payment.member.entity.Member;
+import com.cube.payment.member.entity.MemberGrade;
+import com.cube.payment.order.entity.Order;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,81 +17,78 @@ class DiscountPolicyTest {
 
     @Test
     @DisplayName("NORMAL 등급은 할인이 적용되지 않는다")
-    void normal_member_no_discount() {
+    void NORMAL_등급_할인_없음() {
         Member member = new Member("일반회원", MemberGrade.NORMAL);
         Order order = new Order("상품A", 10_000L, member);
 
-        long discount = normalPolicy.calculateDiscountAmount(order);
-
-        assertThat(discount).isZero();
+        assertThat(normalPolicy.calculateDiscountAmount(order)).isZero();
     }
 
     @Test
     @DisplayName("VIP 등급은 1,000원 고정 할인이 적용된다")
-    void vip_member_fixed_1000_discount() {
+    void VIP_등급_1000원_고정_할인() {
         Member member = new Member("VIP회원", MemberGrade.VIP);
         Order order = new Order("상품B", 10_000L, member);
 
-        long discount = vipPolicy.calculateDiscountAmount(order);
-
-        assertThat(discount).isEqualTo(1_000L);
+        assertThat(vipPolicy.calculateDiscountAmount(order)).isEqualTo(1_000L);
     }
 
     @Test
-    @DisplayName("VIP 등급에서 주문 금액이 할인 금액보다 작으면 원가만큼만 할인된다")
-    void vip_member_discount_capped_at_original_price() {
+    @DisplayName("VIP 등급에서 주문 금액이 1,000원 미만이면 원가만큼만 할인된다")
+    void VIP_주문금액_소액시_원가만큼_할인() {
         Member member = new Member("VIP회원", MemberGrade.VIP);
         Order order = new Order("저가상품", 500L, member);
 
-        long discount = vipPolicy.calculateDiscountAmount(order);
-
-        assertThat(discount).isEqualTo(500L);
+        assertThat(vipPolicy.calculateDiscountAmount(order)).isEqualTo(500L);
     }
 
     @Test
     @DisplayName("VVIP 등급은 주문 금액의 10%가 할인된다")
-    void vvip_member_rate_10_percent_discount() {
+    void VVIP_등급_10퍼센트_할인() {
         Member member = new Member("VVIP회원", MemberGrade.VVIP);
         Order order = new Order("상품C", 20_000L, member);
 
-        long discount = vvipPolicy.calculateDiscountAmount(order);
-
-        assertThat(discount).isEqualTo(2_000L);
+        assertThat(vvipPolicy.calculateDiscountAmount(order)).isEqualTo(2_000L);
     }
 
     @Test
     @DisplayName("NORMAL 회원의 최종 결제 금액은 원가와 동일하다")
-    void normal_member_final_amount_equals_original_price() {
+    void NORMAL_최종금액_원가와_동일() {
         Member member = new Member("일반회원", MemberGrade.NORMAL);
         Order order = new Order("상품A", 10_000L, member);
 
-        long discount = normalPolicy.calculateDiscountAmount(order);
-        long finalAmount = order.getOriginalPrice() - discount;
+        long finalAmount = order.getOriginalPrice() - normalPolicy.calculateDiscountAmount(order);
 
         assertThat(finalAmount).isEqualTo(10_000L);
     }
 
     @Test
     @DisplayName("VIP 회원의 최종 결제 금액은 원가에서 1,000원을 뺀 금액이다")
-    void vip_member_final_amount_is_original_minus_1000() {
+    void VIP_최종금액_원가에서_1000원_차감() {
         Member member = new Member("VIP회원", MemberGrade.VIP);
         Order order = new Order("상품B", 10_000L, member);
 
-        long discount = vipPolicy.calculateDiscountAmount(order);
-        long finalAmount = order.getOriginalPrice() - discount;
+        long finalAmount = order.getOriginalPrice() - vipPolicy.calculateDiscountAmount(order);
 
         assertThat(finalAmount).isEqualTo(9_000L);
     }
 
     @Test
     @DisplayName("VVIP 회원의 최종 결제 금액은 원가의 90%이다")
-    void vvip_member_final_amount_is_90_percent_of_original() {
+    void VVIP_최종금액_원가의_90퍼센트() {
         Member member = new Member("VVIP회원", MemberGrade.VVIP);
         Order order = new Order("상품C", 20_000L, member);
 
-        long discount = vvipPolicy.calculateDiscountAmount(order);
-        long finalAmount = order.getOriginalPrice() - discount;
+        long finalAmount = order.getOriginalPrice() - vvipPolicy.calculateDiscountAmount(order);
 
         assertThat(finalAmount).isEqualTo(18_000L);
+    }
+
+    @Test
+    @DisplayName("할인 정책명이 올바르게 반환된다")
+    void 할인_정책명_올바르게_반환() {
+        assertThat(normalPolicy.getPolicyName()).isEqualTo("NORMAL_NO_DISCOUNT");
+        assertThat(vipPolicy.getPolicyName()).isEqualTo("VIP_FIXED_1000");
+        assertThat(vvipPolicy.getPolicyName()).isEqualTo("VVIP_RATE_10_PERCENT");
     }
 }

@@ -1,13 +1,14 @@
-package com.cube.payment.payment.service;
+package com.cube.payment.payment;
 
+import com.cube.payment.common.exception.CustomException;
+import com.cube.payment.common.exception.ErrorCode;
 import com.cube.payment.discount.DiscountPolicy;
 import com.cube.payment.discount.DiscountPolicyProvider;
-import com.cube.payment.order.domain.Order;
-import com.cube.payment.order.repository.OrderRepository;
-import com.cube.payment.payment.domain.Payment;
-import com.cube.payment.payment.dto.PaymentRequest;
-import com.cube.payment.payment.dto.PaymentResponse;
-import com.cube.payment.payment.repository.PaymentRepository;
+import com.cube.payment.order.OrderRepository;
+import com.cube.payment.order.entity.Order;
+import com.cube.payment.payment.entity.Payment;
+import com.cube.payment.payment.request.PaymentCreateRequest;
+import com.cube.payment.payment.response.PaymentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +25,9 @@ public class PaymentService {
     private final DiscountPolicyProvider discountPolicyProvider;
 
     @Transactional
-    public PaymentResponse pay(PaymentRequest request) {
+    public PaymentResponse pay(PaymentCreateRequest request) {
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. orderId=" + request.getOrderId()));
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         DiscountPolicy policy = discountPolicyProvider.getPolicy(order.getMember().getGrade());
         long discountAmount = policy.calculateDiscountAmount(order);
@@ -36,6 +37,12 @@ public class PaymentService {
                 request.getPaymentMethod(), LocalDateTime.now());
         paymentRepository.save(payment);
 
-        return new PaymentResponse(payment);
+        return PaymentResponse.from(payment);
+    }
+
+    public PaymentResponse findById(Long paymentId) {
+        return paymentRepository.findById(paymentId)
+                .map(PaymentResponse::from)
+                .orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
     }
 }

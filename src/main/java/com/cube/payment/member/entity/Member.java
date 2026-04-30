@@ -1,4 +1,4 @@
-package com.cube.payment.member.domain;
+package com.cube.payment.member.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
