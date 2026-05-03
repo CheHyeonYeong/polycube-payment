@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberService {
 
+    private static final int CAS_MAX_RETRIES = 5;
+
     private final MemberRepository memberRepository;
 
     @Transactional
@@ -24,7 +26,6 @@ public class MemberService {
         return MemberResponse.from(member);
     }
 
-    @Transactional(readOnly = true)
     public MemberResponse read(Long memberId) {
         return MemberResponse.from(getMember(memberId));
     }
@@ -34,12 +35,20 @@ public class MemberService {
                 .orElseThrow(() -> new CustomException(new DomainError.MemberNotFound(memberId)));
     }
 
+    /** CAS UPDATE 로 포인트 차감. 잔액 부족 → PointNotEnough, retry 초과 → PointVersionConflict. */
     @Transactional
     public void deductPoint(Long memberId, long amount) {
-        Member member = getMember(memberId);
-        if (member.getPoint() < amount) {
-            throw new CustomException(new DomainError.InsufficientPoints(memberId, amount, member.getPoint()));
+        for (int attempt = 0; attempt < CAS_MAX_RETRIES; attempt++) {
+            Member fresh = getMember(memberId);
+            if (fresh.getPoint() < amount) {
+                throw new CustomException(new DomainError.PointNotEnough(memberId, amount, fresh.getPoint()));
+            }
+            int updated = memberRepository.casDeductPoint(memberId, fresh.getVersion(), amount);
+            if (updated == 1) {
+                return;
+            }
+            Thread.onSpinWait();
         }
-        member.subtractPoint(amount);
+        throw new CustomException(new DomainError.PointVersionConflict(memberId));
     }
 }

@@ -7,13 +7,15 @@ public record MemberResponse(
         Long id,
         String name,
         MemberGrade grade,
-        long point
+        long point,
+        Long version
 ) {
     public static MemberResponse from(Member member) {
         return new MemberResponse(
                 member.getId(),
                 member.getName(),
                 member.getGrade(),
-                member.getPoint());
+                member.getPoint(),
+                member.getVersion());
     }
 }

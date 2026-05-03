@@ -1,6 +1,5 @@
-package com.cube.member.entity;
+package com.cube.payment.entity;
 
-import java.time.Instant;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -11,9 +10,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 
 import org.hibernate.Hibernate;
+
+import com.cube.common.PaymentMethod;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,40 +21,34 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "member")
+@Table(name = "payment_detail")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class PaymentDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(name = "payment_id")
+    private Long paymentId;
 
     @Enumerated(EnumType.STRING)
-    private MemberGrade grade;
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
 
-    @Column(name = "point")
-    private long point;
+    @Column(name = "gross_amount")
+    private long grossAmount;
 
-    @Version
-    private Long version;
+    @Column(name = "charged_amount")
+    private long chargedAmount;
 
-    @Column(name = "created_at", updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
-    public static Member create(String name, MemberGrade grade, long point) {
-        Member member = new Member();
-        member.name = name;
-        member.grade = grade;
-        member.point = point;
-        Instant now = Instant.now();
-        member.createdAt = now;
-        member.updatedAt = now;
-        return member;
+    public static PaymentDetail create(Long paymentId, PaymentMethod method, long grossAmount, long chargedAmount) {
+        PaymentDetail detail = new PaymentDetail();
+        detail.paymentId = paymentId;
+        detail.paymentMethod = method;
+        detail.grossAmount = grossAmount;
+        detail.chargedAmount = chargedAmount;
+        return detail;
     }
 
     @Override
@@ -65,7 +59,7 @@ public class Member {
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
             return false;
         }
-        Member other = (Member) o;
+        PaymentDetail other = (PaymentDetail) o;
         return id != null && id.equals(other.id);
     }
 
@@ -76,6 +70,6 @@ public class Member {
 
     @Override
     public String toString() {
-        return "Member(id=" + id + ", grade=" + grade + ")";
+        return "PaymentDetail(id=" + id + ", method=" + paymentMethod + ", charged=" + chargedAmount + ")";
     }
 }
