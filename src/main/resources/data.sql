@@ -1,0 +1,4 @@
+INSERT INTO member (name, grade, point, created_at, updated_at) VALUES
+    ('일반회원', 'NORMAL', 0,      CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('VIP회원',  'VIP',    50000,  CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('VVIP회원', 'VVIP',   200000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
